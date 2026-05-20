@@ -1,0 +1,9 @@
+aws_region   = "ap-southeast-1"
+project_name = "secret-monitoring"
+
+secret_name           = "secret-monitoring/demo-secret"
+secret_string         = "replace-with-a-lab-only-secret-value"
+secret_string_version = 1
+
+# Use 0 for fast lab cleanup. Use 7-30 for production-like recovery behavior.
+secret_recovery_window_in_days = 0
