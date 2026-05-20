@@ -1,0 +1,26 @@
+.terraform/
+
+# Terraform state and local inputs
+*.tfstate
+*.tfstate.*
+*.tfvars
+*.tfvars.json
+!*.tfvars.example
+!*.tfvars.json.example
+
+# Terraform runtime files
+*.tfplan
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Local OS/editor files
+.DS_Store
+.idea/
+.vscode/
+
+PLAN.md
+
