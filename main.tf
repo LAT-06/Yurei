@@ -14,3 +14,12 @@ module "cloudtrail" {
   cloudwatch_log_retention_days = var.cloudwatch_log_retention_days
   s3_log_retention_days         = var.s3_log_retention_days
 }
+
+module "secret_access_filter" {
+  source = "./modules/cloudwatch_filter"
+
+  project_name   = var.project_name
+  log_group_name = module.cloudtrail.log_group_name
+  secret_name    = module.secret.name
+  secret_arn     = module.secret.arn
+}

@@ -29,3 +29,23 @@ output "cloudtrail_log_group_name" {
   description = "CloudWatch Logs group that receives CloudTrail events."
   value       = module.cloudtrail.log_group_name
 }
+
+output "secret_access_metric_filter_name" {
+  description = "CloudWatch Logs metric filter that matches monitored secret reads."
+  value       = module.secret_access_filter.filter_name
+}
+
+output "secret_access_metric_namespace" {
+  description = "CloudWatch metric namespace for monitored secret reads."
+  value       = module.secret_access_filter.metric_namespace
+}
+
+output "secret_access_metric_name" {
+  description = "CloudWatch metric name for monitored secret reads."
+  value       = module.secret_access_filter.metric_name
+}
+
+output "secret_access_filter_pattern" {
+  description = "CloudWatch Logs filter pattern used to detect monitored secret reads."
+  value       = module.secret_access_filter.filter_pattern
+}

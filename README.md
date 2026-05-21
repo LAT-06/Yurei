@@ -97,3 +97,33 @@ aws cloudtrail lookup-events \
 ```
 
 CloudTrail can take a few minutes to show new events. The event should have `EventName` set to `GetSecretValue` and `Source` set to `secretsmanager.amazonaws.com`.
+
+## Deploy Step 4
+
+Step 4 adds a CloudWatch Logs metric filter that matches `GetSecretValue` events for the monitored secret.
+
+```sh
+terraform fmt -check -recursive
+terraform validate
+terraform plan
+terraform apply
+```
+
+## Test Step 4
+
+Confirm the metric filter exists:
+
+```sh
+aws logs describe-metric-filters \
+  --region "$(terraform output -raw aws_region)" \
+  --log-group-name "$(terraform output -raw cloudtrail_log_group_name)" \
+  --filter-name-prefix "$(terraform output -raw secret_access_metric_filter_name)"
+```
+
+Test the filter pattern with a sample CloudTrail event:
+
+```sh
+aws logs test-metric-filter \
+  --filter-pattern "$(terraform output -raw secret_access_filter_pattern)" \
+  --log-event-messages "{\"eventSource\":\"secretsmanager.amazonaws.com\",\"eventName\":\"GetSecretValue\",\"requestParameters\":{\"secretId\":\"$(terraform output -raw secret_name)\"}}"
+```
