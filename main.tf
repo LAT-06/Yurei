@@ -23,3 +23,12 @@ module "secret_access_filter" {
   secret_name    = module.secret.name
   secret_arn     = module.secret.arn
 }
+
+module "secret_access_alert" {
+  source = "./modules/alerting"
+
+  project_name     = var.project_name
+  alert_email      = var.alert_email
+  metric_namespace = module.secret_access_filter.metric_namespace
+  metric_name      = module.secret_access_filter.metric_name
+}

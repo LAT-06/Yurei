@@ -49,3 +49,18 @@ output "secret_access_filter_pattern" {
   description = "CloudWatch Logs filter pattern used to detect monitored secret reads."
   value       = module.secret_access_filter.filter_pattern
 }
+
+output "secret_access_alarm_name" {
+  description = "CloudWatch alarm that triggers when the monitored secret is read."
+  value       = module.secret_access_alert.alarm_name
+}
+
+output "secret_access_sns_topic_arn" {
+  description = "SNS topic used for monitored secret access alerts."
+  value       = module.secret_access_alert.topic_arn
+}
+
+output "secret_access_sns_subscription_arn" {
+  description = "SNS email subscription ARN. Email subscriptions show PendingConfirmation until confirmed."
+  value       = module.secret_access_alert.subscription_arn
+}

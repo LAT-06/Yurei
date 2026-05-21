@@ -15,7 +15,7 @@ This project builds a security monitoring system for AWS Secrets Manager access 
 
 - Terraform `>= 1.11`.
 - AWS CLI authenticated to the target account.
-- Permission to create Secrets Manager, CloudTrail, CloudWatch Logs, S3, and IAM resources through Step 2.
+- Permission to create Secrets Manager, CloudTrail, CloudWatch Logs, CloudWatch alarms, SNS, S3, and IAM resources through Step 5.
 
 ## Configure Step 1
 
@@ -25,7 +25,7 @@ Create a local tfvars file:
 cp terraform.tfvars.example terraform.tfvars
 ```
 
-Edit `terraform.tfvars` and replace `secret_string` with a lab-only value. Keep `terraform.tfvars` local; it is ignored by git.
+Edit `terraform.tfvars`, set `alert_email`, and replace `secret_string` with a lab-only value. Keep `terraform.tfvars` local; it is ignored by git.
 
 ## Deploy Step 1
 
@@ -126,4 +126,31 @@ Test the filter pattern with a sample CloudTrail event:
 aws logs test-metric-filter \
   --filter-pattern "$(terraform output -raw secret_access_filter_pattern)" \
   --log-event-messages "{\"eventSource\":\"secretsmanager.amazonaws.com\",\"eventName\":\"GetSecretValue\",\"requestParameters\":{\"secretId\":\"$(terraform output -raw secret_name)\"}}"
+```
+
+## Deploy Step 5
+
+Step 5 adds an SNS topic, email subscription, and CloudWatch alarm. The alarm triggers when the Step 4 metric records at least one secret access event in a 60-second period.
+
+```sh
+terraform fmt -check -recursive
+terraform validate
+terraform plan
+terraform apply
+```
+
+After apply, confirm the SNS subscription email. Notifications are not delivered until the subscription is confirmed.
+
+## Test Step 5
+
+Confirm the alarm and SNS subscription exist:
+
+```sh
+aws cloudwatch describe-alarms \
+  --region "$(terraform output -raw aws_region)" \
+  --alarm-names "$(terraform output -raw secret_access_alarm_name)"
+
+aws sns list-subscriptions-by-topic \
+  --region "$(terraform output -raw aws_region)" \
+  --topic-arn "$(terraform output -raw secret_access_sns_topic_arn)"
 ```

@@ -78,3 +78,13 @@ variable "s3_log_retention_days" {
     error_message = "s3_log_retention_days must be 1 or greater."
   }
 }
+
+variable "alert_email" {
+  description = "Email address subscribed to SNS secret access alerts. Set this only in local terraform.tfvars."
+  type        = string
+
+  validation {
+    condition     = can(regex("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", var.alert_email))
+    error_message = "alert_email must be a valid email address."
+  }
+}
