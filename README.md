@@ -73,3 +73,27 @@ aws logs describe-log-groups \
   --region "$(terraform output -raw aws_region)" \
   --log-group-name-prefix "$(terraform output -raw cloudtrail_log_group_name)"
 ```
+
+## Test Step 3
+
+Read the secret after CloudTrail is enabled:
+
+```sh
+aws secretsmanager get-secret-value \
+  --region "$(terraform output -raw aws_region)" \
+  --secret-id "$(terraform output -raw secret_name)" \
+  --query SecretString \
+  --output text
+```
+
+Then confirm CloudTrail recorded the access event:
+
+```sh
+aws cloudtrail lookup-events \
+  --region "$(terraform output -raw aws_region)" \
+  --lookup-attributes AttributeKey=EventName,AttributeValue=GetSecretValue \
+  --max-results 5 \
+  --query 'Events[].{EventName:EventName,EventTime:EventTime,Source:EventSource,User:Username,Resource:Resources[0].ResourceName}'
+```
+
+CloudTrail can take a few minutes to show new events. The event should have `EventName` set to `GetSecretValue` and `Source` set to `secretsmanager.amazonaws.com`.
