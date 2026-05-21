@@ -15,7 +15,7 @@ This project builds a security monitoring system for AWS Secrets Manager access 
 
 - Terraform `>= 1.11`.
 - AWS CLI authenticated to the target account.
-- Permission to create Secrets Manager resources for Step 1.
+- Permission to create Secrets Manager, CloudTrail, CloudWatch Logs, S3, and IAM resources through Step 2.
 
 ## Configure Step 1
 
@@ -49,4 +49,27 @@ aws secretsmanager get-secret-value \
   --secret-id "$(terraform output -raw secret_name)" \
   --query SecretString \
   --output text
+```
+
+## Deploy Step 2
+
+Step 2 adds a single-region CloudTrail trail, an S3 log bucket, and a CloudWatch Logs group for later metric filtering.
+
+```sh
+terraform fmt -check -recursive
+terraform validate
+terraform plan
+terraform apply
+```
+
+## Test Step 2
+
+```sh
+aws cloudtrail get-trail-status \
+  --region "$(terraform output -raw aws_region)" \
+  --name "$(terraform output -raw cloudtrail_name)"
+
+aws logs describe-log-groups \
+  --region "$(terraform output -raw aws_region)" \
+  --log-group-name-prefix "$(terraform output -raw cloudtrail_log_group_name)"
 ```

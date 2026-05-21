@@ -7,3 +7,6 @@ secret_string_version = 1
 
 # Use 0 for fast lab cleanup. Use 7-30 for production-like recovery behavior.
 secret_recovery_window_in_days = 0
+
+cloudwatch_log_retention_days = 30
+s3_log_retention_days         = 90

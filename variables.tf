@@ -53,3 +53,28 @@ variable "secret_recovery_window_in_days" {
     error_message = "secret_recovery_window_in_days must be 0, or a value from 7 through 30."
   }
 }
+
+variable "cloudwatch_log_retention_days" {
+  description = "Retention period for CloudTrail logs delivered to CloudWatch Logs."
+  type        = number
+  default     = 30
+
+  validation {
+    condition = contains([
+      1, 3, 5, 7, 14, 30, 60, 90, 120, 150, 180,
+      365, 400, 545, 731, 1096, 1827, 2192, 2557, 2922, 3288, 3653
+    ], var.cloudwatch_log_retention_days)
+    error_message = "cloudwatch_log_retention_days must be a retention value supported by CloudWatch Logs."
+  }
+}
+
+variable "s3_log_retention_days" {
+  description = "Number of days to retain CloudTrail log objects in S3."
+  type        = number
+  default     = 90
+
+  validation {
+    condition     = var.s3_log_retention_days >= 1
+    error_message = "s3_log_retention_days must be 1 or greater."
+  }
+}
