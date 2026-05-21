@@ -154,3 +154,54 @@ aws sns list-subscriptions-by-topic \
   --region "$(terraform output -raw aws_region)" \
   --topic-arn "$(terraform output -raw secret_access_sns_topic_arn)"
 ```
+
+## Test Step 6
+
+Trigger the full monitoring flow:
+
+```sh
+aws secretsmanager get-secret-value \
+  --region "$(terraform output -raw aws_region)" \
+  --secret-id "$(terraform output -raw secret_name)" \
+  --query ARN \
+  --output text
+```
+
+Confirm CloudTrail delivered the event to CloudWatch Logs:
+
+```sh
+aws logs filter-log-events \
+  --region "$(terraform output -raw aws_region)" \
+  --log-group-name "$(terraform output -raw cloudtrail_log_group_name)" \
+  --filter-pattern '{ ($.eventSource = "secretsmanager.amazonaws.com") && ($.eventName = "GetSecretValue") }' \
+  --limit 5
+```
+
+Confirm the metric has datapoints:
+
+```sh
+aws cloudwatch get-metric-statistics \
+  --region "$(terraform output -raw aws_region)" \
+  --namespace "$(terraform output -raw secret_access_metric_namespace)" \
+  --metric-name "$(terraform output -raw secret_access_metric_name)" \
+  --start-time "<UTC time before the secret read>" \
+  --end-time "<UTC time after CloudWatch Logs delivery>" \
+  --period 60 \
+  --statistics Sum
+```
+
+Confirm the alarm executed the SNS action:
+
+```sh
+aws cloudwatch describe-alarm-history \
+  --region "$(terraform output -raw aws_region)" \
+  --alarm-name "$(terraform output -raw secret_access_alarm_name)" \
+  --max-records 5
+```
+
+Troubleshooting notes:
+
+- Confirm the SNS subscription email first; pending subscriptions do not receive alert emails.
+- CloudTrail event history can show the event before CloudWatch Logs receives it.
+- CloudWatch alarm notifications can lag several minutes because CloudTrail delivery, metric extraction, and alarm evaluation are separate steps.
+- The alarm returns to `OK` after later periods have no matching events because `treat_missing_data` is set to `notBreaching`.
